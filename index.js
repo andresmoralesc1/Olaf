@@ -267,16 +267,10 @@ const LANDING_HTML = `<!doctype html>
     .olaf-dot { animation: olaf-pulse 1.4s ease-in-out infinite; }
     .olaf-dot-2 { animation-delay: 0.2s; }
     .olaf-dot-3 { animation-delay: 0.4s; }
-    .olaf-grid {
-      background-image: linear-gradient(to right, rgb(15 23 42 / 0.04) 1px, transparent 1px),
-        linear-gradient(to bottom, rgb(15 23 42 / 0.04) 1px, transparent 1px);
-      background-size: 32px 32px;
-    }
   </style>
 </head>
 <body class="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50 text-slate-900 antialiased">
-  <div class="olaf-grid min-h-screen">
-    <main class="mx-auto max-w-2xl px-6 py-16 sm:py-24">
+  <main class="mx-auto max-w-2xl px-6 py-16 sm:py-24">
       <header class="mb-12">
         <div class="flex items-center gap-3 mb-4">
           <div class="h-10 w-10 rounded-xl bg-slate-900 grid place-items-center text-white font-bold text-lg shadow-sm">o</div>
@@ -310,7 +304,6 @@ const LANDING_HTML = `<!doctype html>
         <a href="/health" class="hover:text-slate-600">/health</a>
       </footer>
     </main>
-  </div>
   <script>
     const out = document.getElementById('result');
     const DOT_ROW = (color) =>
@@ -419,16 +412,10 @@ function authHtml(runId, hint, error) {
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
-    .olaf-grid {
-      background-image: linear-gradient(to right, rgb(15 23 42 / 0.04) 1px, transparent 1px),
-        linear-gradient(to bottom, rgb(15 23 42 / 0.04) 1px, transparent 1px);
-      background-size: 32px 32px;
-    }
   </style>
 </head>
 <body class="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50 text-slate-900 antialiased">
-  <div class="olaf-grid min-h-screen">
-    <main class="mx-auto max-w-md px-6 py-16 sm:py-24">
+  <main class="mx-auto max-w-md px-6 py-16 sm:py-24">
       <header class="mb-8">
         <div class="flex items-center gap-3 mb-3">
           <div class="h-10 w-10 rounded-xl bg-slate-900 grid place-items-center text-white font-bold text-lg shadow-sm">o</div>
@@ -461,7 +448,6 @@ function authHtml(runId, hint, error) {
         <div class="text-center text-xs text-slate-400 font-mono break-all">runId: ${runId}</div>
       </form>
     </main>
-  </div>
 </body>
 </html>`;
 }

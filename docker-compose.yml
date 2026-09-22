@@ -6,6 +6,8 @@ services:
     image: olaf-automation:local
     container_name: olaf-automation
     restart: unless-stopped
+    env_file:
+      - .env
     environment:
       NODE_ENV: production
       PORT: "3018"

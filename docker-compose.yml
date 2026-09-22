@@ -1,0 +1,24 @@
+services:
+  olaf:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: olaf-automation:local
+    container_name: olaf-automation
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: "3018"
+    ports:
+      # Solo loopback — Caddy hace el proxy público.
+      - "127.0.0.1:3018:3018"
+    shm_size: "1g"
+    # El binario de Chromium dentro del contenedor viene del image oficial,
+    # así que no necesita --no-sandbox. Lo dejamos en el código igual por si
+    # la imagen cambia.
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3018/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s

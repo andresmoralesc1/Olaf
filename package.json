@@ -1,0 +1,14 @@
+{
+  "name": "olaf-automation",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Playwright automation served via olaf.andresmorales.com.co",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "playwright": "1.49.0"
+  }
+}

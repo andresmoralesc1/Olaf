@@ -9,6 +9,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: "3018"
+      JOB_BOARD_URL: "https://www.translationtms.com/job-board?locales=&statuses=&projectIds=&jobTab=inProgress&tab=job"
     ports:
       # Solo loopback — Caddy hace el proxy público.
       - "127.0.0.1:3018:3018"

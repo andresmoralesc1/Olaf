@@ -1,8 +1,8 @@
 // Olaf automation — Playwright driver expuesto vía HTTP en olaf.andresmorales.com.co.
 // Endpoints:
-//   GET  /            health
-//   POST /run         lanza una corrida contra translationtms.com/job-board
-//   POST /run/:jobId  lanza una corrida y abre la oferta jobId
+//   GET  /                  health
+//   POST /run               lanza una corrida contra JOB_BOARD_URL (vista "in progress")
+//   POST /run/:jobId        lanza una corrida y abre la oferta jobId
 //
 // Se serializa: solo una corrida a la vez (lock en memoria). El sub es
 // deliberadamente simple — un solo browser context por corrida. Subir a
@@ -13,7 +13,14 @@ const express = require('express');
 const { chromium } = require('playwright');
 
 const PORT = Number(process.env.PORT || 3018);
-const TARGET = 'https://translationtms.com/job-board';
+// Vista filtrada: tab=job + jobTab=inProgress muestra solo los jobs en curso.
+// Los filtros locales/statuses/projectIds llegan vacíos — la UI los
+// puebla vía XHR al primer click, así que navegar con la URL basta para
+// entrar al listado.
+const JOB_BOARD_URL =
+  process.env.JOB_BOARD_URL ||
+  'https://www.translationtms.com/job-board?locales=&statuses=&projectIds=&jobTab=inProgress&tab=job';
+const TARGET = JOB_BOARD_URL;
 
 const app = express();
 app.use(express.json({ limit: '64kb' }));
@@ -59,7 +66,7 @@ async function runOnce(opts = {}) {
     const page = await context.newPage();
 
     const url = opts.jobId
-      ? `${TARGET}/${encodeURIComponent(opts.jobId)}`
+      ? `https://www.translationtms.com/job-board/${encodeURIComponent(opts.jobId)}`
       : TARGET;
 
     // Espera dinámica: primero domcontentloaded, después un selector que

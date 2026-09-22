@@ -260,50 +260,113 @@ const LANDING_HTML = `<!doctype html>
   <meta charset="utf-8">
   <title>olaf — translation automation</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body { font: 14px/1.5 system-ui, -apple-system, sans-serif; max-width: 520px; margin: 4rem auto; padding: 0 1rem; color: #222; }
-    h1 { font-size: 1.4rem; margin-bottom: 0.25rem; }
-    p { color: #666; margin-top: 0; }
-    .card { border: 1px solid #ddd; border-radius: 8px; padding: 1.25rem; margin-top: 1.5rem; }
-    button { font: inherit; padding: 0.5rem 1rem; border: 0; background: #0d6efd; color: #fff; border-radius: 6px; cursor: pointer; }
-    button:disabled { opacity: 0.5; cursor: not-allowed; }
-    pre { background: #f5f5f5; border-radius: 4px; padding: 0.5rem; margin: 0.5rem 0 0; font-size: 12px; overflow-x: auto; }
-    .ok { color: #198754; } .err { color: #dc3545; }
-    .status { font-family: ui-monospace, monospace; font-size: 12px; color: #666; }
-    code { background: #f5f5f5; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 12px; }
-    .meta { font-size: 12px; color: #999; margin-top: 1rem; }
+    body { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    @keyframes olaf-pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.4; transform: scale(0.85); } }
+    .olaf-dot { animation: olaf-pulse 1.4s ease-in-out infinite; }
+    .olaf-dot-2 { animation-delay: 0.2s; }
+    .olaf-dot-3 { animation-delay: 0.4s; }
+    .olaf-grid {
+      background-image: linear-gradient(to right, rgb(15 23 42 / 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgb(15 23 42 / 0.04) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
   </style>
 </head>
-<body>
-  <h1>olaf</h1>
-  <p>Translation TMS automation — auto-runs on visit.</p>
-  <div class="card">
-    <div id="result"><p class="status">Starting…</p></div>
-    <div class="meta">If Translation TMS is logged out you'll be asked for a 2FA code. Otherwise this page completes automatically.</div>
+<body class="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50 text-slate-900 antialiased">
+  <div class="olaf-grid min-h-screen">
+    <main class="mx-auto max-w-2xl px-6 py-16 sm:py-24">
+      <header class="mb-12">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="h-10 w-10 rounded-xl bg-slate-900 grid place-items-center text-white font-bold text-lg shadow-sm">o</div>
+          <div>
+            <h1 class="text-xl font-semibold tracking-tight text-slate-900">olaf</h1>
+            <p class="text-xs text-slate-500">Translation TMS automation</p>
+          </div>
+          <span class="ml-auto inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-600 shadow-sm">
+            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+            live
+          </span>
+        </div>
+        <p class="text-slate-600 max-w-lg leading-relaxed">
+          Auto-runs when you visit. Session is cached so 2FA is only requested
+          when Translation TMS invalidates it.
+        </p>
+      </header>
+
+      <section class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <div id="result" class="p-8 sm:p-10">
+          <div class="flex items-center gap-3 text-slate-500">
+            <span class="olaf-dot h-2 w-2 rounded-full bg-slate-400"></span>
+            <span class="olaf-dot olaf-dot-2 h-2 w-2 rounded-full bg-slate-400"></span>
+            <span class="olaf-dot olaf-dot-3 h-2 w-2 rounded-full bg-slate-400"></span>
+            <span class="text-sm">Starting…</span>
+          </div>
+        </div>
+      </section>
+
+      <footer class="mt-8 text-xs text-slate-400 text-center">
+        <a href="/health" class="hover:text-slate-600">/health</a>
+      </footer>
+    </main>
   </div>
   <script>
     const out = document.getElementById('result');
+    const DOT_ROW = (color) =>
+      '<div class="flex items-center gap-3 text-' + color + '-600">'
+      + '<span class="olaf-dot h-2 w-2 rounded-full bg-current"></span>'
+      + '<span class="olaf-dot olaf-dot-2 h-2 w-2 rounded-full bg-current"></span>'
+      + '<span class="olaf-dot olaf-dot-3 h-2 w-2 rounded-full bg-current"></span>'
+      + '<span class="text-sm font-medium">{LABEL}</span></div>';
+
+    const ICON_OK =
+      '<div class="h-10 w-10 rounded-xl bg-emerald-50 grid place-items-center text-emerald-600 mb-4">'
+      + '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
+      + '</div>';
+    const ICON_ERR =
+      '<div class="h-10 w-10 rounded-xl bg-rose-50 grid place-items-center text-rose-600 mb-4">'
+      + '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>'
+      + '</div>';
+
+    const RUN_BUTTON =
+      '<button onclick="location.reload()" class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800 transition-colors">'
+      + '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>'
+      + 'Run again</button>';
+
+    const RETRY_BUTTON =
+      '<button onclick="location.reload()" class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">'
+      + '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>'
+      + 'Retry</button>';
+
     (async () => {
       try {
         const r = await fetch('/run', { method: 'POST' });
         const j = await r.json();
         if (!j.ok) {
-          out.innerHTML = '<p class="err">' + escapeHtml(j.error || 'failed') + '</p>'
-            + '<p><button onclick="location.reload()">Retry</button></p>';
+          out.innerHTML = ICON_ERR
+            + '<h2 class="text-base font-semibold text-slate-900 mb-1">Could not start</h2>'
+            + '<p class="text-sm text-slate-600 mb-6">' + escapeHtml(j.error || 'failed') + '</p>'
+            + RETRY_BUTTON;
           return;
         }
         pollRun(j.runId);
       } catch (err) {
-        out.innerHTML = '<p class="err">' + escapeHtml(err.message) + '</p>'
-          + '<p><button onclick="location.reload()">Retry</button></p>';
+        out.innerHTML = ICON_ERR
+          + '<h2 class="text-base font-semibold text-slate-900 mb-1">Network error</h2>'
+          + '<p class="text-sm text-slate-600 mb-6">' + escapeHtml(err.message) + '</p>'
+          + RETRY_BUTTON;
       }
     })();
+
     async function pollRun(runId) {
       try {
         const r = await fetch('/run/' + runId);
         if (!r.ok) {
-          out.innerHTML = '<p class="err">Lost the run (server restarted?)</p>'
-            + '<p><button onclick="location.reload()">Retry</button></p>';
+          out.innerHTML = ICON_ERR
+            + '<h2 class="text-base font-semibold text-slate-900 mb-1">Lost the run</h2>'
+            + '<p class="text-sm text-slate-600 mb-6">Server restarted mid-run.</p>'
+            + RETRY_BUTTON;
           return;
         }
         const j = await r.json();
@@ -312,22 +375,35 @@ const LANDING_HTML = `<!doctype html>
           return;
         }
         if (j.state === 'done') {
-          out.innerHTML = '<p class="ok">Done.</p>'
-            + '<pre>' + escapeHtml(JSON.stringify(j.result, null, 2)) + '</pre>'
-            + '<p><button onclick="location.reload()">Run again</button></p>';
+          out.innerHTML = ICON_OK
+            + '<h2 class="text-base font-semibold text-slate-900 mb-1">Done</h2>'
+            + '<p class="text-sm text-slate-600 mb-4">Reached the job board.</p>'
+            + '<pre class="rounded-lg bg-slate-900 text-slate-100 p-4 text-xs font-mono overflow-x-auto mb-6 leading-relaxed">'
+            + escapeHtml(JSON.stringify(j.result, null, 2))
+            + '</pre>'
+            + RUN_BUTTON;
           return;
         }
         if (j.state === 'failed') {
-          out.innerHTML = '<p class="err">' + escapeHtml(j.error || 'failed') + '</p>'
-            + '<p><button onclick="location.reload()">Retry</button></p>';
+          out.innerHTML = ICON_ERR
+            + '<h2 class="text-base font-semibold text-slate-900 mb-1">Run failed</h2>'
+            + '<p class="text-sm text-slate-600 mb-6">' + escapeHtml(j.error || 'failed') + '</p>'
+            + RETRY_BUTTON;
           return;
         }
-        out.innerHTML = '<p class="status">' + escapeHtml(j.state) + '…</p>';
+        const label = ({
+          starting: 'Starting',
+          logging_in: 'Logging in',
+          awaiting_2fa: 'Waiting for 2FA',
+          running: 'Scraping job board',
+        })[j.state] || j.state;
+        out.innerHTML = DOT_ROW('slate').replace('{LABEL}', escapeHtml(label));
         setTimeout(() => pollRun(runId), 1500);
       } catch (_) {
         setTimeout(() => pollRun(runId), 3000);
       }
     }
+
     function escapeHtml(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
   </script>
 </body>
@@ -340,32 +416,51 @@ function authHtml(runId, hint, error) {
   <meta charset="utf-8">
   <title>olaf — 2FA required</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body { font: 14px/1.5 system-ui, -apple-system, sans-serif; max-width: 480px; margin: 4rem auto; padding: 0 1rem; color: #222; }
-    h1 { font-size: 1.4rem; margin-bottom: 0.25rem; }
-    p { color: #666; }
-    .card { border: 1px solid #ddd; border-radius: 8px; padding: 1.25rem; margin-top: 1.5rem; }
-    label { display: block; font-weight: 600; margin-bottom: 0.5rem; }
-    input[type=text] { font: inherit; padding: 0.6rem; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; letter-spacing: 0.3em; font-family: ui-monospace, monospace; font-size: 1.4rem; text-align: center; }
-    button { font: inherit; padding: 0.5rem 1rem; border: 0; background: #0d6efd; color: #fff; border-radius: 6px; cursor: pointer; margin-top: 0.75rem; }
-    .meta { font-family: ui-monospace, monospace; font-size: 11px; color: #999; margin-top: 1rem; word-break: break-all; }
-    .err { color: #dc3545; margin-top: 0.5rem; }
-    .hint { background: #f8f9fa; border-radius: 4px; padding: 0.5rem; font-size: 12px; margin-top: 0.75rem; color: #555; }
-    code { background: #f5f5f5; padding: 0.1rem 0.3rem; border-radius: 3px; }
+    body { font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .olaf-grid {
+      background-image: linear-gradient(to right, rgb(15 23 42 / 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgb(15 23 42 / 0.04) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
   </style>
 </head>
-<body>
-  <h1>2FA required</h1>
-  <p>Translation TMS is asking for a one-time code.</p>
-  <div class="card">
-    <form method="POST">
-      <label for="code">Code</label>
-      <input type="text" id="code" name="code" autocomplete="one-time-code" inputmode="numeric" maxlength="8" pattern="[0-9]*" autofocus required>
-      ${hint ? `<div class="hint">Detected field: <code>${hint}</code></div>` : ''}
-      ${error ? `<p class="err">${error}</p>` : ''}
-      <button type="submit">Submit</button>
-    </form>
-    <div class="meta">runId: ${runId}</div>
+<body class="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50 text-slate-900 antialiased">
+  <div class="olaf-grid min-h-screen">
+    <main class="mx-auto max-w-md px-6 py-16 sm:py-24">
+      <header class="mb-8">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="h-10 w-10 rounded-xl bg-slate-900 grid place-items-center text-white font-bold text-lg shadow-sm">o</div>
+          <h1 class="text-xl font-semibold tracking-tight">olaf</h1>
+        </div>
+      </header>
+
+      <section class="rounded-2xl border border-amber-200 bg-amber-50/40 p-6 sm:p-8 mb-6">
+        <div class="flex items-center gap-2 text-amber-700 text-xs font-semibold uppercase tracking-wider mb-3">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/></svg>
+          2FA required
+        </div>
+        <h2 class="text-base font-semibold text-slate-900 mb-1">Enter the one-time code</h2>
+        <p class="text-sm text-slate-600">Translation TMS is asking for verification.</p>
+      </section>
+
+      <form method="POST" class="rounded-2xl border border-slate-200 bg-white shadow-sm p-6 sm:p-8 space-y-5">
+        <div>
+          <label for="code" class="block text-sm font-medium text-slate-700 mb-2">Code</label>
+          <input type="text" id="code" name="code" autocomplete="one-time-code" inputmode="numeric" maxlength="8" pattern="[0-9]*"
+            class="w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-center font-mono text-2xl tracking-[0.4em] text-slate-900 focus:border-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-900/10"
+            autofocus required>
+        </div>
+        ${hint ? `<div class="rounded-lg bg-slate-50 border border-slate-100 px-3 py-2 text-xs text-slate-600">Detected field: <code class="font-mono text-slate-900">${hint}</code></div>` : ''}
+        ${error ? `<div class="rounded-lg bg-rose-50 border border-rose-100 px-3 py-2 text-sm text-rose-700">${error}</div>` : ''}
+        <button type="submit"
+          class="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-slate-800 transition-colors">
+          Submit code
+        </button>
+        <div class="text-center text-xs text-slate-400 font-mono break-all">runId: ${runId}</div>
+      </form>
+    </main>
   </div>
 </body>
 </html>`;

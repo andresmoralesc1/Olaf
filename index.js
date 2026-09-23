@@ -267,34 +267,80 @@ const LANDING_HTML = `<!doctype html>
     .olaf-dot { animation: olaf-pulse 1.4s ease-in-out infinite; }
     .olaf-dot-2 { animation-delay: 0.2s; }
     .olaf-dot-3 { animation-delay: 0.4s; }
+
+    /* Halo: two radial gradients (hot + cool) panned and pulsed. */
+    @keyframes olaf-halo-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes olaf-halo-pulse { 0%, 100% { opacity: 0.85; } 50% { opacity: 1; } }
+    .olaf-halo {
+      position: absolute;
+      inset: -25%;
+      background:
+        radial-gradient(closest-side at 28% 32%, rgb(255 153 56 / 0.30), transparent 70%),
+        radial-gradient(closest-side at 72% 68%, rgb(142 58 11 / 0.35), transparent 70%),
+        radial-gradient(closest-side at 50% 50%, rgb(0 0 0 / 0.85), transparent 50%);
+      filter: blur(60px);
+      animation: olaf-halo-spin 60s linear infinite, olaf-halo-pulse 8s ease-in-out infinite;
+    }
+    /* Dark center shadow: simulates the event horizon's pitch-black disk. */
+    .olaf-shadow {
+      position: absolute;
+      left: 50%; top: 50%;
+      width: 240px; height: 240px;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(circle, rgb(0 0 0 / 0.95) 0%, rgb(0 0 0 / 0.6) 50%, transparent 75%);
+      border-radius: 9999px;
+    }
+    /* Starfield: small dots scattered via stacked radial-gradients. */
+    .olaf-stars {
+      position: absolute; inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,0.7), transparent),
+        radial-gradient(1px 1px at 27% 41%, rgba(255,255,255,0.5), transparent),
+        radial-gradient(1px 1px at 41% 9%, rgba(255,255,255,0.6), transparent),
+        radial-gradient(1px 1px at 58% 26%, rgba(255,255,255,0.4), transparent),
+        radial-gradient(1px 1px at 73% 12%, rgba(255,255,255,0.7), transparent),
+        radial-gradient(1px 1px at 88% 38%, rgba(255,255,255,0.5), transparent),
+        radial-gradient(1px 1px at 8% 62%, rgba(255,255,255,0.6), transparent),
+        radial-gradient(1px 1px at 22% 78%, rgba(255,255,255,0.4), transparent),
+        radial-gradient(1px 1px at 36% 91%, rgba(255,255,255,0.7), transparent),
+        radial-gradient(1px 1px at 51% 68%, rgba(255,255,255,0.5), transparent),
+        radial-gradient(1px 1px at 66% 84%, rgba(255,255,255,0.6), transparent),
+        radial-gradient(1px 1px at 82% 71%, rgba(255,255,255,0.4), transparent),
+        radial-gradient(1px 1px at 95% 92%, rgba(255,255,255,0.7), transparent);
+      background-size: 100% 100%;
+      animation: olaf-halo-pulse 6s ease-in-out infinite;
+    }
   </style>
 </head>
-<body class="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50 text-slate-900 antialiased">
-  <main class="mx-auto max-w-2xl px-6 py-16 sm:py-24">
+<body class="min-h-screen bg-slate-950 text-slate-100 antialiased overflow-x-hidden relative">
+  <div class="olaf-halo" aria-hidden="true"></div>
+  <div class="olaf-stars" aria-hidden="true"></div>
+
+  <main class="relative mx-auto max-w-2xl px-6 py-16 sm:py-24">
       <header class="mb-12">
         <div class="flex items-center gap-3 mb-4">
-          <div class="h-10 w-10 rounded-xl bg-slate-900 grid place-items-center text-white font-bold text-lg shadow-sm">o</div>
+          <div class="h-10 w-10 rounded-xl bg-white grid place-items-center text-slate-900 font-bold text-lg shadow-sm">o</div>
           <div>
-            <h1 class="text-xl font-semibold tracking-tight text-slate-900">olaf</h1>
-            <p class="text-xs text-slate-500">Translation TMS automation</p>
+            <h1 class="text-xl font-semibold tracking-tight text-white">olaf</h1>
+            <p class="text-xs text-slate-400">Translation TMS automation</p>
           </div>
-          <span class="ml-auto inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-600 shadow-sm">
-            <span class="h-1.5 w-1.5 rounded-full bg-emerald-500"></span>
+          <span class="ml-auto inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur px-2.5 py-1 text-xs text-slate-300">
+            <span class="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
             live
           </span>
         </div>
-        <p class="text-slate-600 max-w-lg leading-relaxed">
-          Auto-runs when you visit. Session is cached so 2FA is only requested
-          when Translation TMS invalidates it.
+        <p class="text-slate-300 max-w-lg leading-relaxed">
+          Press Start to run. Session is cached so 2FA is only requested when
+          Translation TMS invalidates it.
         </p>
       </header>
 
-      <section class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+      <section class="rounded-2xl border border-slate-700/60 bg-slate-900/80 backdrop-blur shadow-xl shadow-black/40 overflow-hidden">
         <div id="result" class="p-8 sm:p-10">
           <div class="flex items-center justify-between gap-4">
             <div>
-              <h2 class="text-base font-semibold text-slate-900 mb-1">Run automation</h2>
-              <p class="text-sm text-slate-600">Will try the saved session first. If Translation TMS asks, you'll see a 2FA form.</p>
+              <h2 class="text-base font-semibold text-white mb-1">Run automation</h2>
+              <p class="text-sm text-slate-400">Will try the saved session first. If Translation TMS asks, you'll see a 2FA form.</p>
             </div>
             <button id="go" class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800 transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>
@@ -313,28 +359,28 @@ const LANDING_HTML = `<!doctype html>
     const go = document.getElementById('go');
 
     const DOT_ROW = (color, label) =>
-      '<div class="flex items-center gap-3 text-' + color + '-600">'
+      '<div class="flex items-center gap-3 text-' + color + '-300">'
       + '<span class="olaf-dot h-2 w-2 rounded-full bg-current"></span>'
       + '<span class="olaf-dot olaf-dot-2 h-2 w-2 rounded-full bg-current"></span>'
       + '<span class="olaf-dot olaf-dot-3 h-2 w-2 rounded-full bg-current"></span>'
-      + '<span class="text-sm font-medium">' + escapeHtml(label) + '</span></div>';
+      + '<span class="text-sm font-medium text-slate-200">' + escapeHtml(label) + '</span></div>';
 
     const ICON_OK =
-      '<div class="h-10 w-10 rounded-xl bg-emerald-50 grid place-items-center text-emerald-600 mb-4">'
+      '<div class="h-10 w-10 rounded-xl bg-emerald-500/15 grid place-items-center text-emerald-400 mb-4">'
       + '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
       + '</div>';
     const ICON_ERR =
-      '<div class="h-10 w-10 rounded-xl bg-rose-50 grid place-items-center text-rose-600 mb-4">'
+      '<div class="h-10 w-10 rounded-xl bg-rose-500/15 grid place-items-center text-rose-400 mb-4">'
       + '<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>'
       + '</div>';
 
     const RUN_BUTTON =
-      '<button onclick="location.reload()" class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800 transition-colors">'
+      '<button onclick="location.reload()" class="inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2 text-sm font-medium text-slate-900 shadow-sm hover:bg-slate-100 transition-colors">'
       + '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></svg>'
       + 'Run again</button>';
 
     const RETRY_BUTTON =
-      '<button onclick="location.reload()" class="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">'
+      '<button onclick="location.reload()" class="inline-flex items-center gap-2 rounded-lg border border-slate-600 bg-transparent px-4 py-2 text-sm font-medium text-slate-200 hover:bg-slate-800 transition-colors">'
       + '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>'
       + 'Retry</button>';
 
@@ -346,8 +392,8 @@ const LANDING_HTML = `<!doctype html>
         const j = await r.json();
         if (!j.ok) {
           out.innerHTML = ICON_ERR
-            + '<h2 class="text-base font-semibold text-slate-900 mb-1">Could not start</h2>'
-            + '<p class="text-sm text-slate-600 mb-6">' + escapeHtml(j.error || 'failed') + '</p>'
+            + '<h2 class="text-base font-semibold text-white mb-1">Could not start</h2>'
+            + '<p class="text-sm text-slate-400 mb-6">' + escapeHtml(j.error || 'failed') + '</p>'
             + RETRY_BUTTON;
           go.disabled = false;
           return;
@@ -355,8 +401,8 @@ const LANDING_HTML = `<!doctype html>
         pollRun(j.runId);
       } catch (err) {
         out.innerHTML = ICON_ERR
-          + '<h2 class="text-base font-semibold text-slate-900 mb-1">Network error</h2>'
-          + '<p class="text-sm text-slate-600 mb-6">' + escapeHtml(err.message) + '</p>'
+          + '<h2 class="text-base font-semibold text-white mb-1">Network error</h2>'
+          + '<p class="text-sm text-slate-400 mb-6">' + escapeHtml(err.message) + '</p>'
           + RETRY_BUTTON;
         go.disabled = false;
       }
@@ -367,8 +413,8 @@ const LANDING_HTML = `<!doctype html>
         const r = await fetch('/run/' + runId);
         if (!r.ok) {
           out.innerHTML = ICON_ERR
-            + '<h2 class="text-base font-semibold text-slate-900 mb-1">Lost the run</h2>'
-            + '<p class="text-sm text-slate-600 mb-6">Server restarted mid-run.</p>'
+            + '<h2 class="text-base font-semibold text-white mb-1">Lost the run</h2>'
+            + '<p class="text-sm text-slate-400 mb-6">Server restarted mid-run.</p>'
             + RETRY_BUTTON;
           return;
         }
@@ -379,9 +425,9 @@ const LANDING_HTML = `<!doctype html>
         }
         if (j.state === 'done') {
           out.innerHTML = ICON_OK
-            + '<h2 class="text-base font-semibold text-slate-900 mb-1">Done</h2>'
-            + '<p class="text-sm text-slate-600 mb-4">Reached the job board.</p>'
-            + '<pre class="rounded-lg bg-slate-900 text-slate-100 p-4 text-xs font-mono overflow-x-auto mb-6 leading-relaxed">'
+            + '<h2 class="text-base font-semibold text-white mb-1">Done</h2>'
+            + '<p class="text-sm text-slate-400 mb-4">Reached the job board.</p>'
+            + '<pre class="rounded-lg bg-black/50 border border-slate-700/60 text-slate-200 p-4 text-xs font-mono overflow-x-auto mb-6 leading-relaxed">'
             + escapeHtml(JSON.stringify(j.result, null, 2))
             + '</pre>'
             + RUN_BUTTON;
@@ -389,8 +435,8 @@ const LANDING_HTML = `<!doctype html>
         }
         if (j.state === 'failed') {
           out.innerHTML = ICON_ERR
-            + '<h2 class="text-base font-semibold text-slate-900 mb-1">Run failed</h2>'
-            + '<p class="text-sm text-slate-600 mb-6">' + escapeHtml(j.error || 'failed') + '</p>'
+            + '<h2 class="text-base font-semibold text-white mb-1">Run failed</h2>'
+            + '<p class="text-sm text-slate-400 mb-6">' + escapeHtml(j.error || 'failed') + '</p>'
             + RETRY_BUTTON;
           return;
         }
@@ -400,7 +446,7 @@ const LANDING_HTML = `<!doctype html>
           awaiting_2fa: 'Waiting for 2FA',
           running: 'Scraping job board',
         })[j.state] || j.state;
-        out.innerHTML = DOT_ROW('slate').replace('{LABEL}', escapeHtml(label));
+        out.innerHTML = DOT_ROW('slate', label);
         setTimeout(() => pollRun(runId), 1500);
       } catch (_) {
         setTimeout(() => pollRun(runId), 3000);

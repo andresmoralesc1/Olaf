@@ -291,11 +291,15 @@ const LANDING_HTML = `<!doctype html>
 
       <section class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
         <div id="result" class="p-8 sm:p-10">
-          <div class="flex items-center gap-3 text-slate-500">
-            <span class="olaf-dot h-2 w-2 rounded-full bg-slate-400"></span>
-            <span class="olaf-dot olaf-dot-2 h-2 w-2 rounded-full bg-slate-400"></span>
-            <span class="olaf-dot olaf-dot-3 h-2 w-2 rounded-full bg-slate-400"></span>
-            <span class="text-sm">Starting…</span>
+          <div class="flex items-center justify-between gap-4">
+            <div>
+              <h2 class="text-base font-semibold text-slate-900 mb-1">Run automation</h2>
+              <p class="text-sm text-slate-600">Will try the saved session first. If Translation TMS asks, you'll see a 2FA form.</p>
+            </div>
+            <button id="go" class="inline-flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800 transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 3 20 12 6 21 6 3"/></svg>
+              Start
+            </button>
           </div>
         </div>
       </section>
@@ -306,12 +310,14 @@ const LANDING_HTML = `<!doctype html>
     </main>
   <script>
     const out = document.getElementById('result');
-    const DOT_ROW = (color) =>
+    const go = document.getElementById('go');
+
+    const DOT_ROW = (color, label) =>
       '<div class="flex items-center gap-3 text-' + color + '-600">'
       + '<span class="olaf-dot h-2 w-2 rounded-full bg-current"></span>'
       + '<span class="olaf-dot olaf-dot-2 h-2 w-2 rounded-full bg-current"></span>'
       + '<span class="olaf-dot olaf-dot-3 h-2 w-2 rounded-full bg-current"></span>'
-      + '<span class="text-sm font-medium">{LABEL}</span></div>';
+      + '<span class="text-sm font-medium">' + escapeHtml(label) + '</span></div>';
 
     const ICON_OK =
       '<div class="h-10 w-10 rounded-xl bg-emerald-50 grid place-items-center text-emerald-600 mb-4">'
@@ -332,7 +338,9 @@ const LANDING_HTML = `<!doctype html>
       + '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>'
       + 'Retry</button>';
 
-    (async () => {
+    go.addEventListener('click', async () => {
+      go.disabled = true;
+      out.innerHTML = DOT_ROW('slate', 'Starting');
       try {
         const r = await fetch('/run', { method: 'POST' });
         const j = await r.json();
@@ -341,6 +349,7 @@ const LANDING_HTML = `<!doctype html>
             + '<h2 class="text-base font-semibold text-slate-900 mb-1">Could not start</h2>'
             + '<p class="text-sm text-slate-600 mb-6">' + escapeHtml(j.error || 'failed') + '</p>'
             + RETRY_BUTTON;
+          go.disabled = false;
           return;
         }
         pollRun(j.runId);
@@ -349,8 +358,9 @@ const LANDING_HTML = `<!doctype html>
           + '<h2 class="text-base font-semibold text-slate-900 mb-1">Network error</h2>'
           + '<p class="text-sm text-slate-600 mb-6">' + escapeHtml(err.message) + '</p>'
           + RETRY_BUTTON;
+        go.disabled = false;
       }
-    })();
+    });
 
     async function pollRun(runId) {
       try {
